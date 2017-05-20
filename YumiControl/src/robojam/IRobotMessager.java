@@ -1,0 +1,5 @@
+package robojam;
+
+interface IRobotMessage
+{
+}
