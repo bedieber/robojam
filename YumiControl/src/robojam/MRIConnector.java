@@ -50,11 +50,9 @@ public class MRIConnector {
     try {
         OutputStream outputStream = _socket.getOutputStream();
 
-        System.out.println("Writing " + bytes.length + " bytes");
         outputStream.write(bytes);
         outputStream.flush();
-        Thread.sleep(5000);
-        System.out.println("Command sent");
+        Thread.sleep(1000);
     }
          catch (IOException e) {
             e.printStackTrace();

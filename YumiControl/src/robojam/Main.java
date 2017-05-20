@@ -19,5 +19,10 @@ public class Main {
 
         stielzchen.placeAt(4,2);
         stielzchen.placeAt(7,8);
+
+        stielzchen.leftArmPickUpAt(5,5);
+        stielzchen.leftArmPlaceAt(5,5);
+        stielzchen.rightArmPickUpAt(6,6);
+        stielzchen.rightArmPlaceAt(6,6);
     }
 }
