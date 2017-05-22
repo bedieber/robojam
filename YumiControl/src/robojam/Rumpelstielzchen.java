@@ -10,7 +10,7 @@ public class Rumpelstielzchen {
     private MRIConnector _leftArm;
     private MRIConnector _rightArm;
 
-    private Transform _leftArmIdle = new Transform(new Vector3(280, 270, 150), new Vector3(3.14, 0, 0));
+    private Transform _leftArmIdle = new Transform(new Vector3(280, 270, 150), new Vector3(3.14, 0, 135));
     private Transform _rightArmIdle = new Transform(new Vector3(280, -270, 150), new Vector3(3.14, 0, 0));
 
     public Rumpelstielzchen(MRIConnector leftArm, MRIConnector rightArm, Vector3 gameRoot) {
@@ -20,10 +20,9 @@ public class Rumpelstielzchen {
     }
 
     /**
-     * @brief picks up an object at the specified location with auto arm select
-     *
-     * @param row zero-based row
+     * @param row    zero-based row
      * @param column zero-based column
+     * @brief picks up an object at the specified location with auto arm select
      */
     public void pickUpAt(int row, int column) {
 
@@ -35,9 +34,9 @@ public class Rumpelstielzchen {
     }
 
     /**
-     * @brief places an object at the specified location with auto arm select
-     * @param row zero-based row
+     * @param row    zero-based row
      * @param column zero-based column
+     * @brief places an object at the specified location with auto arm select
      */
     public void placeAt(int row, int column) {
 
@@ -49,10 +48,9 @@ public class Rumpelstielzchen {
     }
 
     /**
-     * @brief picks up an object at the specified location with the left arm
-     *
-     * @param row zero-based row
+     * @param row    zero-based row
      * @param column zero-based column
+     * @brief picks up an object at the specified location with the left arm
      */
     public void leftArmPickUpAt(int row, int column) {
 
@@ -62,11 +60,11 @@ public class Rumpelstielzchen {
             e.printStackTrace();
         }
     }
+
     /**
-     * @brief picks up an object at the specified location with the right arm
-     *
-     * @param row zero-based row
+     * @param row    zero-based row
      * @param column zero-based column
+     * @brief picks up an object at the specified location with the right arm
      */
     public void rightArmPickUpAt(int row, int column) {
 
@@ -76,11 +74,11 @@ public class Rumpelstielzchen {
             e.printStackTrace();
         }
     }
+
     /**
-     * @brief places an object at the specified location with the left arm
-     *
-     * @param row zero-based row
+     * @param row    zero-based row
      * @param column zero-based column
+     * @brief places an object at the specified location with the left arm
      */
     public void leftArmPlaceAt(int row, int column) {
 
@@ -90,11 +88,11 @@ public class Rumpelstielzchen {
             e.printStackTrace();
         }
     }
+
     /**
-     * @brief places an object at the specified location with the right arm
-     *
-     * @param row zero-based row
+     * @param row    zero-based row
      * @param column zero-based column
+     * @brief places an object at the specified location with the right arm
      */
     public void rightArmPlaceAt(int row, int column) {
 
@@ -122,18 +120,18 @@ public class Rumpelstielzchen {
             else
                 _leftArm.sendCommand(new PositionCommand(_leftArmIdle));
 
-            calculatePosition(row, column, openGripper, activeArm);
+            calculatePosition(row, column, openGripper, activeArm, moveLeft ? _leftArmIdle.getRotation() : _rightArmIdle.getRotation());
         } else {
             if (forceLeft) {
                 System.out.println("Forcing leftArm");
                 _rightArm.sendCommand(new PositionCommand(_rightArmIdle));
-                calculatePosition(row, column, openGripper, _leftArm);
+                calculatePosition(row, column, openGripper, _leftArm, _leftArmIdle.getRotation());
                 return;
             }
             if (forceRight) {
                 System.out.println("Forcing right arm");
                 _leftArm.sendCommand(new PositionCommand(_leftArmIdle));
-                calculatePosition(row, column, openGripper, _rightArm);
+                calculatePosition(row, column, openGripper, _rightArm, _rightArmIdle.getRotation());
                 return;
             }
         }
@@ -141,7 +139,7 @@ public class Rumpelstielzchen {
 
     }
 
-    private void calculatePosition(int row, int column, boolean openGripper, MRIConnector activeArm) throws InterruptedException {
+    private void calculatePosition(int row, int column, boolean openGripper, MRIConnector activeArm, Vector3 rotation) throws InterruptedException {
         double x, y;
         x = _gameRoot.getX() - row * 50;
         y = _gameRoot.getY() + column * 50;
@@ -149,28 +147,31 @@ public class Rumpelstielzchen {
         System.out.println("Moving to " + target.getX() + "/" + target.getY() + "/" + target.getZ());
         //hover above
         System.out.println("Approaching target position");
-        activeArm.sendCommand(new PositionCommand(target, _leftArmIdle.getRotation()));
-        Thread.sleep(5000);
+        activeArm.sendCommand(new PositionCommand(target, rotation));
+        Thread.sleep(8000);
         if (!openGripper) {
             activeArm.sendCommand(new GripperCommand(GripperState.OPEN));
         }
         //go down
         System.out.println("Going down");
-        target.setZ(30);
-        activeArm.sendCommand(new PositionCommand(target, _leftArmIdle.getRotation()));
-        Thread.sleep(2000);
+        if (activeArm == _rightArm)
+            target.setZ(27);
+        else
+            target.setZ(33);
+        activeArm.sendCommand(new PositionCommand(target, rotation));
+        Thread.sleep(3000);
         //perform grip action
         System.out.println("Grip");
         GripperCommand gripperCommand = new GripperCommand();
         gripperCommand.set_state(openGripper ? GripperState.OPEN : GripperState.CLOSED);
         activeArm.sendCommand(gripperCommand);
-        //Thread.sleep(2000);
+        Thread.sleep(500);
 
         //go up
         System.out.println("Going up");
         target.setZ(150);
-        activeArm.sendCommand(new PositionCommand(target, _leftArmIdle.getRotation()));
-        //Thread.sleep(5000);
+        activeArm.sendCommand(new PositionCommand(target, rotation));
+        Thread.sleep(2000);
     }
 
 
